@@ -1,0 +1,184 @@
+name: govflow
+
+services:
+  # ============================================================================
+  # 1. Primary Database: PostgreSQL 15 (techstack.md §4)
+  # ============================================================================
+  postgres:
+    image: postgres:15-alpine
+    container_name: govflow-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-govflow}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-govflow_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-govflow}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-govflow} -d ${POSTGRES_DB:-govflow}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - govflow-network
+
+  # ============================================================================
+  # 2. Task Queue Broker: Redis (techstack.md §2)
+  # ============================================================================
+  redis:
+    image: redis:7-alpine
+    container_name: govflow-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - govflow-network
+
+  # ============================================================================
+  # 3. Object Storage: MinIO S3-compatible (techstack.md §4)
+  # ============================================================================
+  minio:
+    image: minio/minio:latest
+    container_name: govflow-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-minioadmin}
+    ports:
+      - "${MINIO_API_PORT:-9000}:9000"
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9000/minio/health/live || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - govflow-network
+
+  # Helper container to create default MinIO bucket
+  minio-init:
+    image: minio/mc:latest
+    container_name: govflow-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc alias set local http://minio:9000 ${MINIO_ACCESS_KEY:-minioadmin} ${MINIO_SECRET_KEY:-minioadmin};
+      /usr/bin/mc mb --ignore-existing local/${MINIO_BUCKET:-govflow-documents};
+      /usr/bin/mc anonymous set download local/${MINIO_BUCKET:-govflow-documents};
+      exit 0;
+      "
+    networks:
+      - govflow-network
+
+  # ============================================================================
+  # 4. Backend API Gateway: FastAPI (techstack.md §2)
+  # ============================================================================
+  api-gateway:
+    build:
+      context: ../../
+      dockerfile: infra/docker/api-gateway.Dockerfile
+    container_name: govflow-api-gateway
+    restart: unless-stopped
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-govflow}:${POSTGRES_PASSWORD:-govflow_secret}@postgres:5432/${POSTGRES_DB:-govflow}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-govflow-documents}
+      MINIO_SECURE: "false"
+      JWT_SECRET: ${JWT_SECRET:-govflow_jwt_super_secret_key_change_in_production_min_32_bytes}
+    ports:
+      - "${API_GATEWAY_PORT:-8000}:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
+    networks:
+      - govflow-network
+
+  # ============================================================================
+  # 5. AI Workers: Celery Worker Process (techstack.md §3)
+  # ============================================================================
+  ai-workers:
+    build:
+      context: ../../
+      dockerfile: infra/docker/ai-workers.Dockerfile
+    container_name: govflow-ai-workers
+    restart: unless-stopped
+    command: celery -A src.queue.tasks worker --loglevel=info
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-govflow}:${POSTGRES_PASSWORD:-govflow_secret}@postgres:5432/${POSTGRES_DB:-govflow}
+      REDIS_URL: redis://redis:6379/0
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-govflow-documents}
+      MINIO_SECURE: "false"
+    depends_on:
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    networks:
+      - govflow-network
+
+  # ============================================================================
+  # 6. Frontend: Next.js (techstack.md §1)
+  # ============================================================================
+  web:
+    build:
+      context: ../../
+      dockerfile: infra/docker/web.Dockerfile
+    container_name: govflow-web
+    restart: unless-stopped
+    environment:
+      NODE_ENV: ${NODE_ENV:-development}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+    networks:
+      - govflow-network
+
+volumes:
+  postgres_data:
+    name: govflow_postgres_data
+  redis_data:
+    name: govflow_redis_data
+  minio_data:
+    name: govflow_minio_data
+
+networks:
+  govflow-network:
+    name: govflow-network
+    driver: bridge

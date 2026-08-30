@@ -1,0 +1,424 @@
+"""
+GovFlow GraphQL Schema
+Mirrors core capabilities and shared entities per GovFlow_PRD.md §10, §11, and §12.
+"""
+
+scalar DateTime
+scalar JSON
+
+# ============================================================================
+# Enums
+# ============================================================================
+
+enum ComplianceFlagStatus {
+  Verified
+  Potential_Non_Compliance
+  Needs_Review
+  Insufficient_Evidence
+  Missing
+}
+
+enum SeverityLevel {
+  low
+  medium
+  high
+  critical
+}
+
+enum OfficerDecisionState {
+  Pending
+  Confirmed
+  Rejected
+  Overridden
+  Escalated
+}
+
+enum HighlightColor {
+  red
+  amber
+  green
+  blue
+}
+
+enum GraphNodeStatus {
+  Verified
+  Potential_Non_Compliance
+  Confirmed_Non_Compliance
+  Needs_Review
+  Insufficient_Evidence
+  Missing
+  Processing
+}
+
+enum GraphNodeColor {
+  green
+  amber
+  red
+  grey
+  blue
+}
+
+enum ProcessingJobType {
+  ingestion
+  ocr_extraction
+  compliance_evaluation
+  report_generation
+}
+
+enum ProcessingJobStatus {
+  queued
+  processing
+  completed
+  failed
+  retrying
+}
+
+# ============================================================================
+# Core Types (PRD §10 & §12.2)
+# ============================================================================
+
+type BoundingBox {
+  pageNumber: Int!
+  pageWidth: Float!
+  pageHeight: Float!
+  x1: Float!
+  y1: Float!
+  x2: Float!
+  y2: Float!
+}
+
+type ComplianceFlag {
+  id: ID!
+  tenderId: ID!
+  bidderId: ID!
+  ruleId: ID
+  status: ComplianceFlagStatus!
+  severity: SeverityLevel!
+  title: String!
+  reason: String!
+  evidenceIds: [ID!]!
+  linkedFlagIds: [ID!]
+  aiRecommendation: String!
+  officerDecision: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type OfficerDecision {
+  id: ID!
+  tenderId: ID!
+  bidderId: ID!
+  flagId: ID!
+  decision: OfficerDecisionState!
+  officerUserId: String!
+  officerRole: String!
+  notes: String
+  previousDecisionState: OfficerDecisionState
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+Immutable append-only audit event record per PRD §9.2
+"""
+type AuditEvent {
+  id: ID!
+  tenderId: ID!
+  bidderId: ID!
+  documentId: ID
+  complianceFlagId: ID
+  officerUserId: String!
+  officerRole: String!
+  aiRecommendation: String!
+  officerDecision: String!
+  officerNotes: String
+  timestamp: DateTime!
+  previousDecisionState: String
+  newDecisionState: String!
+}
+
+type Tender {
+  id: ID!
+  tenderNumber: String!
+  title: String!
+  description: String
+  status: String!
+  closingDate: DateTime
+  createdById: ID
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type TenderRule {
+  id: ID!
+  tenderId: ID!
+  ruleCode: String!
+  name: String!
+  description: String!
+  ruleType: String!
+  parameters: JSON!
+  severity: SeverityLevel!
+  isRequired: Boolean!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type RequiredDocument {
+  id: ID!
+  tenderId: ID!
+  documentType: String!
+  displayName: String!
+  description: String
+  isRequired: Boolean!
+  allowedExtensions: [String!]!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Bidder {
+  id: ID!
+  tenderId: ID!
+  name: String!
+  registrationNumber: String
+  gstin: String
+  pan: String
+  udyamNumber: String
+  status: String!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type Document {
+  id: ID!
+  tenderId: ID!
+  bidderId: ID!
+  requiredDocumentId: ID
+  documentType: String
+  fileName: String!
+  fileSize: Int!
+  fileType: String!
+  storagePath: String!
+  pageCount: Int!
+  status: String!
+  errorMessage: String
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+type DocumentPage {
+  id: ID!
+  documentId: ID!
+  pageNumber: Int!
+  pageWidth: Float!
+  pageHeight: Float!
+  imageStoragePath: String
+  createdAt: DateTime!
+}
+
+type ProcessingJob {
+  id: ID!
+  tenderId: ID!
+  bidderId: ID
+  documentId: ID
+  jobType: ProcessingJobType!
+  status: ProcessingJobStatus!
+  progress: Float!
+  currentStep: String
+  errorMessage: String
+  retryCount: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  completedAt: DateTime
+}
+
+type ExtractedField {
+  id: ID!
+  documentId: ID!
+  pageNumber: Int!
+  fieldName: String!
+  rawText: String!
+  normalizedValue: JSON
+  confidence: Float!
+  boundingBox: BoundingBox!
+  extractionMethod: String!
+  createdAt: DateTime!
+}
+
+type EvidenceAnchor {
+  id: ID!
+  documentId: ID!
+  pageNumber: Int!
+  boundingBox: BoundingBox!
+  extractedFieldId: ID
+  complianceFlagId: ID
+  highlightColor: HighlightColor
+  label: String
+  snippet: String
+  createdAt: DateTime!
+}
+
+type GraphNodePosition {
+  x: Float!
+  y: Float!
+}
+
+type GraphNode {
+  id: ID!
+  type: String!
+  label: String!
+  status: GraphNodeStatus!
+  color: GraphNodeColor!
+  data: JSON!
+  position: GraphNodePosition
+}
+
+type GraphEdge {
+  id: ID!
+  source: ID!
+  target: ID!
+  type: String
+  label: String
+  animated: Boolean
+  style: JSON
+}
+
+type GraphData {
+  nodes: [GraphNode!]!
+  edges: [GraphEdge!]!
+}
+
+type BidderComplianceSummary {
+  bidderId: ID!
+  tenderId: ID!
+  bidderName: String!
+  complianceScore: Float!
+  totalDocuments: Int!
+  submittedDocuments: Int!
+  missingDocuments: Int!
+  verifiedFlagsCount: Int!
+  needsReviewFlagsCount: Int!
+  nonComplianceFlagsCount: Int!
+  confirmedFlagsCount: Int!
+  unresolvedFlagsCount: Int!
+  processingStatus: String!
+  primaryRiskReasons: [String!]!
+  overallStatus: String!
+  updatedAt: DateTime!
+}
+
+type ReportData {
+  tender: Tender!
+  bidder: Bidder!
+  summary: BidderComplianceSummary!
+  flags: [ComplianceFlag!]!
+  decisions: [OfficerDecision!]!
+  generatedAt: DateTime!
+}
+
+type DownloadUrlPayload {
+  url: String!
+  expiresAt: DateTime!
+}
+
+# ============================================================================
+# Inputs
+# ============================================================================
+
+input CreateTenderInput {
+  tenderNumber: String!
+  title: String!
+  description: String
+  status: String = "draft"
+  closingDate: DateTime
+}
+
+input UpdateTenderInput {
+  title: String
+  description: String
+  status: String
+  closingDate: DateTime
+}
+
+input CreateTenderRuleInput {
+  ruleCode: String!
+  name: String!
+  description: String!
+  ruleType: String!
+  parameters: JSON!
+  severity: SeverityLevel!
+  isRequired: Boolean = true
+}
+
+input CreateRequiredDocumentInput {
+  documentType: String!
+  displayName: String!
+  description: String
+  isRequired: Boolean = true
+  allowedExtensions: [String!]!
+}
+
+input RecordOfficerDecisionInput {
+  decision: OfficerDecisionState!
+  officerUserId: String!
+  officerRole: String!
+  notes: String
+}
+
+# ============================================================================
+# Root Query & Mutation Definitions
+# ============================================================================
+
+type Query {
+  # Tenders
+  tenders(status: String): [Tender!]!
+  tender(id: ID!): Tender
+  tenderRules(tenderId: ID!): [TenderRule!]!
+  requiredDocuments(tenderId: ID!): [RequiredDocument!]!`
+
+  # Bidders
+  bidders(tenderId: ID!, status: String): [Bidder!]!
+  bidder(tenderId: ID!, bidderId: ID!): Bidder
+  bidderSummaries(tenderId: ID!): [BidderComplianceSummary!]!
+  bidderSummary(tenderId: ID!, bidderId: ID!): BidderComplianceSummary
+
+  # Ingestion & Jobs
+  processingJob(id: ID!): ProcessingJob
+
+  # Documents
+  documents(tenderId: ID!, bidderId: ID!): [Document!]!
+  document(id: ID!): Document
+  documentPages(documentId: ID!): [DocumentPage!]!
+  documentDownloadUrl(documentId: ID!): DownloadUrlPayload!
+
+  # Extractions
+  extractedFields(documentId: ID!, pageNumber: Int): [ExtractedField!]!
+
+  # Compliance
+  complianceFlags(tenderId: ID!, bidderId: ID!, status: ComplianceFlagStatus): [ComplianceFlag!]!
+  complianceFlag(id: ID!): ComplianceFlag
+  flagDecisions(flagId: ID!): [OfficerDecision!]!
+
+  # Star Graph
+  bidderGraph(tenderId: ID!, bidderId: ID!): GraphData!
+
+  # Evidence
+  evidenceAnchors(documentId: ID!, pageNumber: Int!): [EvidenceAnchor!]!
+  flagEvidence(flagId: ID!): [EvidenceAnchor!]!
+
+  # Reports
+  latestReport(tenderId: ID!, bidderId: ID!): ReportData
+  reportDownloadUrl(reportId: ID!): DownloadUrlPayload!
+
+  # Audit
+  tenderAuditEvents(tenderId: ID!, officerUserId: String): [AuditEvent!]!
+  bidderAuditEvents(tenderId: ID!, bidderId: ID!): [AuditEvent!]!
+}
+
+type Mutation {
+  createTender(input: CreateTenderInput!): Tender!
+  updateTender(id: ID!, input: UpdateTenderInput!): Tender!
+  createTenderRule(tenderId: ID!, input: CreateTenderRuleInput!): TenderRule!
+  createRequiredDocument(tenderId: ID!, input: CreateRequiredDocumentInput!): RequiredDocument!
+  recordOfficerDecision(flagId: ID!, input: RecordOfficerDecisionInput!): OfficerDecision!
+  requestReportGeneration(tenderId: ID!, bidderId: ID!): ProcessingJob!
+}

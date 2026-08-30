@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/tender.schema.json",
+  "title": "Tender",
+  "description": "Procurement opportunity and evaluation workspace per PRD §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the tender"
+    },
+    "tenderNumber": {
+      "type": "string",
+      "description": "Official tender reference number / code"
+    },
+    "title": {
+      "type": "string",
+      "description": "Tender title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description of the tender"
+    },
+    "status": {
+      "type": "string",
+      "description": "Status of the tender workspace (e.g. draft, active, evaluating, completed, archived)"
+    },
+    "closingDate": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Tender submission deadline"
+    },
+    "createdById": {
+      "type": "string",
+      "description": "User identifier who created the tender"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last update"
+    }
+  },
+  "required": [
+    "id",
+    "tenderNumber",
+    "title",
+    "status",
+    "createdAt",
+    "updatedAt"
+  ],
+  "additionalProperties": false
+}

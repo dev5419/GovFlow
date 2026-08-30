@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/evidence-anchor.schema.json",
+  "title": "EvidenceAnchor",
+  "description": "Visual coordinate anchor linking a compliance finding or field to document page canvas per PRD §8.6 and §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the evidence anchor"
+    },
+    "documentId": {
+      "type": "string",
+      "description": "Associated Document identifier"
+    },
+    "pageNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Target page number"
+    },
+    "boundingBox": {
+      "type": "object",
+      "properties": {
+        "pageNumber": { "type": "integer", "minimum": 1 },
+        "pageWidth": { "type": "number", "exclusiveMinimum": 0 },
+        "pageHeight": { "type": "number", "exclusiveMinimum": 0 },
+        "x1": { "type": "number" },
+        "y1": { "type": "number" },
+        "x2": { "type": "number" },
+        "y2": { "type": "number" }
+      },
+      "required": ["pageNumber", "pageWidth", "pageHeight", "x1", "y1", "x2", "y2"],
+      "additionalProperties": false,
+      "description": "Bounding box coordinates on the page canvas per PRD §12.3"
+    },
+    "extractedFieldId": {
+      "type": "string",
+      "description": "Optional associated ExtractedField ID"
+    },
+    "complianceFlagId": {
+      "type": "string",
+      "description": "Optional associated ComplianceFlag ID"
+    },
+    "highlightColor": {
+      "type": "string",
+      "enum": ["red", "amber", "green", "blue"],
+      "description": "Highlight overlay color per PRD §8.6"
+    },
+    "label": {
+      "type": "string",
+      "description": "Short badge text displayed on hover/click"
+    },
+    "snippet": {
+      "type": "string",
+      "description": "Text snippet extracted inside this bounding region"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    }
+  },
+  "required": [
+    "id",
+    "documentId",
+    "pageNumber",
+    "boundingBox",
+    "createdAt"
+  ],
+  "additionalProperties": false
+}

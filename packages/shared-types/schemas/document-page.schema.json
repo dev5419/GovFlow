@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/document-page.schema.json",
+  "title": "DocumentPage",
+  "description": "Page in a multipage document with dimensions and rendered image reference per PRD §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the document page"
+    },
+    "documentId": {
+      "type": "string",
+      "description": "Associated Document identifier"
+    },
+    "pageNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based page number"
+    },
+    "pageWidth": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Page width in coordinate space points"
+    },
+    "pageHeight": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Page height in coordinate space points"
+    },
+    "imageStoragePath": {
+      "type": "string",
+      "description": "Object storage path for pre-rendered page image used by Evidence Viewer"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    }
+  },
+  "required": [
+    "id",
+    "documentId",
+    "pageNumber",
+    "pageWidth",
+    "pageHeight",
+    "createdAt"
+  ],
+  "additionalProperties": false
+}

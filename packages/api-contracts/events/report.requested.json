@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/events/report.requested.json",
+  "title": "ReportRequestedEvent",
+  "description": "Event emitted when officer requests an explainable compliance report per PRD §11.3",
+  "metadata": {
+    "eventName": "report.requested",
+    "producer": "API Gateway",
+    "consumer": "Report Generator",
+    "purpose": "Generate a compliance report"
+  },
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "report.requested"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "reportRequestId": {
+          "type": "string"
+        },
+        "tenderId": {
+          "type": "string"
+        },
+        "bidderId": {
+          "type": "string"
+        },
+        "requestedByUserId": {
+          "type": "string"
+        },
+        "jobId": {
+          "type": "string"
+        }
+      },
+      "required": ["reportRequestId", "tenderId", "bidderId", "requestedByUserId", "jobId"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["eventId", "eventType", "timestamp", "payload"],
+  "additionalProperties": false
+}

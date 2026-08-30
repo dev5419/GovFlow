@@ -1,0 +1,887 @@
+openapi: 3.1.0
+info:
+  title: GovFlow API
+  version: 0.1.0
+  description: >
+    API contract for GovFlow — interactive audit and compliance platform for procurement officers.
+    Covers core capabilities defined in GovFlow_PRD.md §12.1.
+servers:
+  - url: http://localhost:8000
+    description: Local API Gateway
+
+paths:
+  # ==========================================================================
+  # 1. Tenders
+  # ==========================================================================
+  /tenders:
+    get:
+      summary: Retrieve list of tenders
+      operationId: listTenders
+      tags: [Tenders]
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter tenders by status
+      responses:
+        '200':
+          description: List of tenders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/tender.schema.json'
+    post:
+      summary: Create a new tender workspace
+      operationId: createTender
+      tags: [Tenders]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [tenderNumber, title, status]
+              properties:
+                tenderNumber:
+                  type: string
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                  default: draft
+                closingDate:
+                  type: string
+                  format: date-time
+      responses:
+        '201':
+          description: Tender created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/tender.schema.json'
+
+  /tenders/{tenderId}:
+    get:
+      summary: Retrieve tender details
+      operationId: getTender
+      tags: [Tenders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tender details
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/tender.schema.json'
+        '404':
+          description: Tender not found
+    put:
+      summary: Update tender configuration
+      operationId: updateTender
+      tags: [Tenders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status:
+                  type: string
+                closingDate:
+                  type: string
+                  format: date-time
+      responses:
+        '200':
+          description: Tender updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/tender.schema.json'
+
+  /tenders/{tenderId}/rules:
+    get:
+      summary: Retrieve compliance rules configured for a tender
+      operationId: listTenderRules
+      tags: [Tenders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of tender compliance rules
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/tender-rule.schema.json'
+    post:
+      summary: Add or configure a compliance rule for a tender
+      operationId: createTenderRule
+      tags: [Tenders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ruleCode, name, description, ruleType, parameters, severity]
+              properties:
+                ruleCode:
+                  type: string
+                name:
+                  type: string
+                description:
+                  type: string
+                ruleType:
+                  type: string
+                parameters:
+                  type: object
+                severity:
+                  type: string
+                  enum: [low, medium, high, critical]
+                isRequired:
+                  type: boolean
+                  default: true
+      responses:
+        '201':
+          description: Rule added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/tender-rule.schema.json'
+
+  /tenders/{tenderId}/required-documents:
+    get:
+      summary: Retrieve required document definitions for a tender
+      operationId: listRequiredDocuments
+      tags: [Tenders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of required document types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/required-document.schema.json'
+    post:
+      summary: Add a required document requirement to a tender
+      operationId: createRequiredDocument
+      tags: [Tenders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [documentType, displayName, isRequired, allowedExtensions]
+              properties:
+                documentType:
+                  type: string
+                displayName:
+                  type: string
+                description:
+                  type: string
+                isRequired:
+                  type: boolean
+                  default: true
+                allowedExtensions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '201':
+          description: Required document rule added
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/required-document.schema.json'
+
+  # ==========================================================================
+  # 2. Bidders & Dashboard Aggregations
+  # ==========================================================================
+  /tenders/{tenderId}/bidders:
+    get:
+      summary: Retrieve bidder list and compliance summaries for tender dashboard (F-01)
+      operationId: listBidders
+      tags: [Bidders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filter bidders by status
+      responses:
+        '200':
+          description: List of bidders participating in the tender
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/bidder.schema.json'
+
+  /tenders/{tenderId}/bidders/summaries:
+    get:
+      summary: Retrieve aggregated bidder risk summaries for dashboard (F-01)
+      operationId: listBidderSummaries
+      tags: [Bidders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Aggregated compliance summaries for all bidders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/bidder-compliance-summary.schema.json'
+
+  /tenders/{tenderId}/bidders/{bidderId}:
+    get:
+      summary: Retrieve single bidder profile
+      operationId: getBidder
+      tags: [Bidders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bidder profile
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/bidder.schema.json'
+        '404':
+          description: Bidder not found
+
+  /tenders/{tenderId}/bidders/{bidderId}/summary:
+    get:
+      summary: Retrieve bidder compliance score and risk summary (F-01 / F-04)
+      operationId: getBidderSummary
+      tags: [Bidders]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bidder compliance summary
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/bidder-compliance-summary.schema.json'
+
+  # ==========================================================================
+  # 3. Ingestion
+  # ==========================================================================
+  /tenders/{tenderId}/ingestion/upload:
+    post:
+      summary: Upload batch bid package (ZIP/PDF/Image) (F-02)
+      operationId: uploadBidPackage
+      tags: [Ingestion]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: ZIP archive, PDF document, or scanned image (.pdf, .png, .jpg, .jpeg, .zip)
+                bidderId:
+                  type: string
+                  description: Optional bidder identifier if pre-associated
+                bidderName:
+                  type: string
+                  description: Optional bidder legal entity name
+      responses:
+        '202':
+          description: Ingestion job accepted and queued
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/processing-job.schema.json'
+
+  /ingestion/jobs/{jobId}:
+    get:
+      summary: Retrieve asynchronous processing job status
+      operationId: getProcessingJob
+      tags: [Ingestion]
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Processing job status and progress
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/processing-job.schema.json'
+        '404':
+          description: Job not found
+
+  # ==========================================================================
+  # 4. Documents
+  # ==========================================================================
+  /tenders/{tenderId}/bidders/{bidderId}/documents:
+    get:
+      summary: Retrieve all uploaded documents for a bidder
+      operationId: listBidderDocuments
+      tags: [Documents]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/document.schema.json'
+
+  /documents/{documentId}:
+    get:
+      summary: Retrieve document metadata
+      operationId: getDocument
+      tags: [Documents]
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Document metadata
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/document.schema.json'
+        '404':
+          description: Document not found
+
+  /documents/{documentId}/pages:
+    get:
+      summary: Retrieve page metadata and coordinate dimensions for a document (F-06)
+      operationId: listDocumentPages
+      tags: [Documents]
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: List of document pages
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/document-page.schema.json'
+
+  /documents/{documentId}/download-url:
+    get:
+      summary: Generate secure temporary signed URL for document viewing (PRD §21.2)
+      operationId: getDocumentDownloadUrl
+      tags: [Documents]
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Signed URL details
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [url, expiresAt]
+                properties:
+                  url:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+
+  # ==========================================================================
+  # 5. Extraction
+  # ==========================================================================
+  /documents/{documentId}/extractions:
+    get:
+      summary: Retrieve extracted fields, confidence scores, and bounding boxes (F-03)
+      operationId: listDocumentExtractions
+      tags: [Extraction]
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pageNumber
+          in: query
+          required: false
+          schema:
+            type: integer
+          description: Filter fields by 1-based page number
+      responses:
+        '200':
+          description: List of extracted fields
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/extracted-field.schema.json'
+
+  # ==========================================================================
+  # 6. Compliance & Officer Decisions
+  # ==========================================================================
+  /tenders/{tenderId}/bidders/{bidderId}/flags:
+    get:
+      summary: Retrieve compliance flags, contradictions, and rule results (F-04)
+      operationId: listComplianceFlags
+      tags: [Compliance]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [Verified, "Potential Non-Compliance", "Needs Review", "Insufficient Evidence", Missing]
+      responses:
+        '200':
+          description: List of compliance flags
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/compliance-flag.schema.json'
+
+  /compliance/flags/{flagId}:
+    get:
+      summary: Retrieve single compliance flag with evidence links
+      operationId: getComplianceFlag
+      tags: [Compliance]
+      parameters:
+        - name: flagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Compliance flag details
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/compliance-flag.schema.json'
+        '404':
+          description: Flag not found
+
+  /compliance/flags/{flagId}/decision:
+    post:
+      summary: Record procurement officer decision on a compliance flag (PRD §9.1)
+      operationId: recordOfficerDecision
+      tags: [Compliance]
+      parameters:
+        - name: flagId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [decision, officerUserId, officerRole]
+              properties:
+                decision:
+                  type: string
+                  enum: [Pending, Confirmed, Rejected, Overridden, Escalated]
+                officerUserId:
+                  type: string
+                officerRole:
+                  type: string
+                notes:
+                  type: string
+                  description: Mandatory reason if overriding or rejecting AI recommendation
+      responses:
+        '200':
+          description: Officer decision recorded and audit event created
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/officer-decision.schema.json'
+
+  /compliance/flags/{flagId}/decisions:
+    get:
+      summary: Retrieve decision history for a compliance flag
+      operationId: listFlagDecisions
+      tags: [Compliance]
+      parameters:
+        - name: flagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: History of officer decisions on this flag
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/officer-decision.schema.json'
+
+  # ==========================================================================
+  # 7. Graph
+  # ==========================================================================
+  /tenders/{tenderId}/bidders/{bidderId}/graph:
+    get:
+      summary: Retrieve interactive star topology graph nodes and edges (F-05)
+      operationId: getBidderGraph
+      tags: [Graph]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Star graph representation
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [nodes, edges]
+                properties:
+                  nodes:
+                    type: array
+                    items:
+                      $ref: '../../shared-types/schemas/graph-node.schema.json'
+                  edges:
+                    type: array
+                    items:
+                      $ref: '../../shared-types/schemas/graph-edge.schema.json'
+
+  # ==========================================================================
+  # 8. Evidence
+  # ==========================================================================
+  /documents/{documentId}/pages/{pageNumber}/evidence-anchors:
+    get:
+      summary: Retrieve visual evidence overlays for document page canvas (F-06)
+      operationId: listPageEvidenceAnchors
+      tags: [Evidence]
+      parameters:
+        - name: documentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: pageNumber
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of evidence anchors and bounding boxes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/evidence-anchor.schema.json'
+
+  /compliance/flags/{flagId}/evidence:
+    get:
+      summary: Retrieve all linked source evidence anchors for a flag (F-04 / F-06)
+      operationId: listFlagEvidenceAnchors
+      tags: [Evidence]
+      parameters:
+        - name: flagId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Linked evidence anchors across documents
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/evidence-anchor.schema.json'
+
+  # ==========================================================================
+  # 9. Reports
+  # ==========================================================================
+  /tenders/{tenderId}/bidders/{bidderId}/reports:
+    post:
+      summary: Request generation of explainable compliance report (F-07)
+      operationId: requestReportGeneration
+      tags: [Reports]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: Report generation job queued
+          content:
+            application/json:
+              schema:
+                $ref: '../../shared-types/schemas/processing-job.schema.json'
+
+  /tenders/{tenderId}/bidders/{bidderId}/reports/latest:
+    get:
+      summary: Retrieve viewable compliance report data (F-07)
+      operationId: getLatestBidderReport
+      tags: [Reports]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Structured report data
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [tender, bidder, summary, flags, decisions, generatedAt]
+                properties:
+                  tender:
+                    $ref: '../../shared-types/schemas/tender.schema.json'
+                  bidder:
+                    $ref: '../../shared-types/schemas/bidder.schema.json'
+                  summary:
+                    $ref: '../../shared-types/schemas/bidder-compliance-summary.schema.json'
+                  flags:
+                    type: array
+                    items:
+                      $ref: '../../shared-types/schemas/compliance-flag.schema.json'
+                  decisions:
+                    type: array
+                    items:
+                      $ref: '../../shared-types/schemas/officer-decision.schema.json'
+                  generatedAt:
+                    type: string
+                    format: date-time
+        '404':
+          description: Report not found
+
+  /reports/{reportId}/download-url:
+    get:
+      summary: Retrieve download URL for PDF compliance report (F-07)
+      operationId: getReportDownloadUrl
+      tags: [Reports]
+      parameters:
+        - name: reportId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Secure download URL
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [downloadUrl, expiresAt]
+                properties:
+                  downloadUrl:
+                    type: string
+                    format: uri
+                  expiresAt:
+                    type: string
+                    format: date-time
+
+  # ==========================================================================
+  # 10. Audit
+  # ==========================================================================
+  /tenders/{tenderId}/audit-events:
+    get:
+      summary: Retrieve immutable audit trail for a tender (PRD §9.2)
+      operationId: listTenderAuditEvents
+      tags: [Audit]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: officerUserId
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Append-only audit log
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/audit-event.schema.json'
+
+  /tenders/{tenderId}/bidders/{bidderId}/audit-events:
+    get:
+      summary: Retrieve audit trail for a specific bidder (PRD §9.2)
+      operationId: listBidderAuditEvents
+      tags: [Audit]
+      parameters:
+        - name: tenderId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: bidderId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Bidder decision and action audit trail
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '../../shared-types/schemas/audit-event.schema.json'

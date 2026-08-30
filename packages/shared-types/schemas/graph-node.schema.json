@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/graph-node.schema.json",
+  "title": "GraphNode",
+  "description": "Star graph node representation for BidderStarGraph per PRD §8.5 and §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the node"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["bidder", "document"],
+      "description": "Node category in the star topology"
+    },
+    "label": {
+      "type": "string",
+      "description": "Display label on the node"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Verified",
+        "Potential Non-Compliance",
+        "Confirmed Non-Compliance",
+        "Needs Review",
+        "Insufficient Evidence",
+        "Missing",
+        "Processing"
+      ],
+      "description": "Compliance and processing status determining color per PRD §8.5"
+    },
+    "color": {
+      "type": "string",
+      "enum": ["green", "amber", "red", "grey", "blue"],
+      "description": "Assigned node status color per PRD §8.5"
+    },
+    "data": {
+      "type": "object",
+      "description": "Metadata payload including document ID, flag count, and status flags",
+      "additionalProperties": true
+    },
+    "position": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number" },
+        "y": { "type": "number" }
+      },
+      "required": ["x", "y"],
+      "additionalProperties": false,
+      "description": "Optional 2D coordinate position for React Flow canvas"
+    }
+  },
+  "required": [
+    "id",
+    "type",
+    "label",
+    "status",
+    "color",
+    "data"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,9 @@
+{
+  "name": "@govflow/ai-workers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "celery -A src.queue.tasks worker --loglevel=info",
+    "test": "pytest tests/"
+  }
+}

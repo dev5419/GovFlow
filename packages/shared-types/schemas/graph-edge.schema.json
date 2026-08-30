@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/graph-edge.schema.json",
+  "title": "GraphEdge",
+  "description": "Star graph edge connecting bidder to document node or cross-document contradiction link per PRD §8.5 and §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the edge"
+    },
+    "source": {
+      "type": "string",
+      "description": "Source node identifier"
+    },
+    "target": {
+      "type": "string",
+      "description": "Target node identifier"
+    },
+    "type": {
+      "type": "string",
+      "description": "Edge render type (e.g. radial, contradiction, smoothstep)"
+    },
+    "label": {
+      "type": "string",
+      "description": "Optional label rendered along the edge"
+    },
+    "animated": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the edge displays animation (e.g. active processing or mismatch)"
+    },
+    "style": {
+      "type": "object",
+      "description": "Optional CSS / styling overrides",
+      "additionalProperties": true
+    }
+  },
+  "required": [
+    "id",
+    "source",
+    "target"
+  ],
+  "additionalProperties": false
+}

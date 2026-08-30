@@ -1,0 +1,12 @@
+paddleocr>=2.8
+paddlepaddle>=2.6
+transformers>=4.44
+torch>=2.4
+opencv-python>=4.10
+Pillow>=10.4
+celery>=5.4
+redis>=5.0
+sqlalchemy>=2.0
+psycopg2-binary>=2.9
+minio>=7.2
+reportlab>=4.2

@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/events/report.generated.json",
+  "title": "ReportGeneratedEvent",
+  "description": "Event emitted when compliance report generation finishes per PRD §11.3",
+  "metadata": {
+    "eventName": "report.generated",
+    "producer": "Report Generator",
+    "consumer": "API Gateway",
+    "purpose": "Make report available to officer"
+  },
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "report.generated"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "reportId": {
+          "type": "string"
+        },
+        "tenderId": {
+          "type": "string"
+        },
+        "bidderId": {
+          "type": "string"
+        },
+        "jobId": {
+          "type": "string"
+        },
+        "reportStoragePath": {
+          "type": "string",
+          "description": "Object storage key for the generated PDF / HTML report"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "summary": {
+          "$ref": "../../shared-types/schemas/bidder-compliance-summary.schema.json"
+        }
+      },
+      "required": ["reportId", "tenderId", "bidderId", "jobId", "reportStoragePath", "generatedAt", "summary"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["eventId", "eventType", "timestamp", "payload"],
+  "additionalProperties": false
+}

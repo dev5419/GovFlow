@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/events/document.uploaded.json",
+  "title": "DocumentUploadedEvent",
+  "description": "Event emitted when a bid package or document is uploaded to object storage per PRD §11.3",
+  "metadata": {
+    "eventName": "document.uploaded",
+    "producer": "API Gateway",
+    "consumer": "Ingestion Worker",
+    "purpose": "Start ingestion workflow"
+  },
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "document.uploaded"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "tenderId": {
+          "type": "string"
+        },
+        "bidderId": {
+          "type": "string"
+        },
+        "document": {
+          "$ref": "../../shared-types/schemas/document.schema.json"
+        },
+        "jobId": {
+          "type": "string"
+        }
+      },
+      "required": ["tenderId", "document", "jobId"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["eventId", "eventType", "timestamp", "payload"],
+  "additionalProperties": false
+}

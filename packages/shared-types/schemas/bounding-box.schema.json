@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/bounding-box.schema.json",
+  "title": "BoundingBox",
+  "description": "Bounding box coordinates and page dimensions for visual evidence overlays per PRD §12.3",
+  "type": "object",
+  "properties": {
+    "pageNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "1-based document page number"
+    },
+    "pageWidth": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Original page width in pixels/points"
+    },
+    "pageHeight": {
+      "type": "number",
+      "exclusiveMinimum": 0,
+      "description": "Original page height in pixels/points"
+    },
+    "x1": {
+      "type": "number",
+      "description": "Top-left X coordinate"
+    },
+    "y1": {
+      "type": "number",
+      "description": "Top-left Y coordinate"
+    },
+    "x2": {
+      "type": "number",
+      "description": "Bottom-right X coordinate"
+    },
+    "y2": {
+      "type": "number",
+      "description": "Bottom-right Y coordinate"
+    }
+  },
+  "required": [
+    "pageNumber",
+    "pageWidth",
+    "pageHeight",
+    "x1",
+    "y1",
+    "x2",
+    "y2"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/events/document.extraction.completed.json",
+  "title": "DocumentExtractionCompletedEvent",
+  "description": "Event emitted when OCR and LayoutLMv3 field extraction finishes per PRD §11.3",
+  "metadata": {
+    "eventName": "document.extraction.completed",
+    "producer": "OCR Worker",
+    "consumer": "Compliance Engine",
+    "purpose": "Start compliance evaluation"
+  },
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "document.extraction.completed"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "tenderId": {
+          "type": "string"
+        },
+        "bidderId": {
+          "type": "string"
+        },
+        "documentId": {
+          "type": "string"
+        },
+        "jobId": {
+          "type": "string"
+        },
+        "extractedFields": {
+          "type": "array",
+          "items": {
+            "$ref": "../../shared-types/schemas/extracted-field.schema.json"
+          },
+          "description": "List of normalized fields extracted with bounding boxes"
+        }
+      },
+      "required": ["tenderId", "bidderId", "documentId", "jobId", "extractedFields"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["eventId", "eventType", "timestamp", "payload"],
+  "additionalProperties": false
+}

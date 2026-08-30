@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/officer-decision.schema.json",
+  "title": "OfficerDecision",
+  "description": "Officer review decision record on a compliance flag per PRD §9.1 and §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the decision record"
+    },
+    "tenderId": {
+      "type": "string",
+      "description": "Associated Tender identifier"
+    },
+    "bidderId": {
+      "type": "string",
+      "description": "Associated Bidder identifier"
+    },
+    "flagId": {
+      "type": "string",
+      "description": "Target compliance flag ID"
+    },
+    "decision": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Confirmed",
+        "Rejected",
+        "Overridden",
+        "Escalated"
+      ],
+      "description": "Officer decision state per PRD §9.1"
+    },
+    "officerUserId": {
+      "type": "string",
+      "description": "Identity of the reviewing procurement officer"
+    },
+    "officerRole": {
+      "type": "string",
+      "description": "Role of the officer (e.g. Procurement Officer, Compliance Auditor)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Officer rationale or override explanation"
+    },
+    "previousDecisionState": {
+      "type": "string",
+      "enum": [
+        "Pending",
+        "Confirmed",
+        "Rejected",
+        "Overridden",
+        "Escalated"
+      ],
+      "description": "Previous decision state prior to this action"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when decision was made"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last update"
+    }
+  },
+  "required": [
+    "id",
+    "tenderId",
+    "bidderId",
+    "flagId",
+    "decision",
+    "officerUserId",
+    "officerRole",
+    "createdAt",
+    "updatedAt"
+  ],
+  "additionalProperties": false
+}

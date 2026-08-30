@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/events/compliance.evaluation.completed.json",
+  "title": "ComplianceEvaluationCompletedEvent",
+  "description": "Event emitted when compliance rules evaluation and anomaly detection complete per PRD §11.3",
+  "metadata": {
+    "eventName": "compliance.evaluation.completed",
+    "producer": "Compliance Engine",
+    "consumer": "API Gateway / Dashboard",
+    "purpose": "Refresh bidder summary and graph data"
+  },
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "compliance.evaluation.completed"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "tenderId": {
+          "type": "string"
+        },
+        "bidderId": {
+          "type": "string"
+        },
+        "summary": {
+          "$ref": "../../shared-types/schemas/bidder-compliance-summary.schema.json"
+        },
+        "flags": {
+          "type": "array",
+          "items": {
+            "$ref": "../../shared-types/schemas/compliance-flag.schema.json"
+          }
+        },
+        "graphNodes": {
+          "type": "array",
+          "items": {
+            "$ref": "../../shared-types/schemas/graph-node.schema.json"
+          }
+        },
+        "graphEdges": {
+          "type": "array",
+          "items": {
+            "$ref": "../../shared-types/schemas/graph-edge.schema.json"
+          }
+        }
+      },
+      "required": ["tenderId", "bidderId", "summary", "flags", "graphNodes", "graphEdges"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["eventId", "eventType", "timestamp", "payload"],
+  "additionalProperties": false
+}

@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/events/document.preprocessed.json",
+  "title": "DocumentPreprocessedEvent",
+  "description": "Event emitted when document pages are split and preprocessed for OCR extraction per PRD §11.3",
+  "metadata": {
+    "eventName": "document.preprocessed",
+    "producer": "Ingestion Worker",
+    "consumer": "OCR Worker",
+    "purpose": "Start OCR and layout extraction"
+  },
+  "type": "object",
+  "properties": {
+    "eventId": {
+      "type": "string",
+      "description": "Unique event identifier"
+    },
+    "eventType": {
+      "type": "string",
+      "const": "document.preprocessed"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "correlationId": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object",
+      "properties": {
+        "tenderId": {
+          "type": "string"
+        },
+        "bidderId": {
+          "type": "string"
+        },
+        "documentId": {
+          "type": "string"
+        },
+        "jobId": {
+          "type": "string"
+        },
+        "pages": {
+          "type": "array",
+          "items": {
+            "$ref": "../../shared-types/schemas/document-page.schema.json"
+          },
+          "description": "List of split and preprocessed document pages"
+        }
+      },
+      "required": ["tenderId", "documentId", "jobId", "pages"],
+      "additionalProperties": false
+    }
+  },
+  "required": ["eventId", "eventType", "timestamp", "payload"],
+  "additionalProperties": false
+}

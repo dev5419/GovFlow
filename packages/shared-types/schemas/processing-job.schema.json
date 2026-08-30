@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/processing-job.schema.json",
+  "title": "ProcessingJob",
+  "description": "Asynchronous job execution state for ingestion, OCR, compliance, and report generation per PRD §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the processing job"
+    },
+    "tenderId": {
+      "type": "string",
+      "description": "Associated Tender identifier"
+    },
+    "bidderId": {
+      "type": "string",
+      "description": "Optional associated Bidder identifier"
+    },
+    "documentId": {
+      "type": "string",
+      "description": "Optional associated Document identifier"
+    },
+    "jobType": {
+      "type": "string",
+      "enum": [
+        "ingestion",
+        "ocr_extraction",
+        "compliance_evaluation",
+        "report_generation"
+      ],
+      "description": "Type of asynchronous task"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "queued",
+        "processing",
+        "completed",
+        "failed",
+        "retrying"
+      ],
+      "description": "Current lifecycle status of the job"
+    },
+    "progress": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100,
+      "default": 0,
+      "description": "Percentage progress from 0 to 100"
+    },
+    "currentStep": {
+      "type": "string",
+      "description": "Human-readable label of current processing stage"
+    },
+    "errorMessage": {
+      "type": "string",
+      "description": "Error details if job failed"
+    },
+    "retryCount": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 0,
+      "description": "Number of retries attempted"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of job creation"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last status update"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when job finished"
+    }
+  },
+  "required": [
+    "id",
+    "tenderId",
+    "jobType",
+    "status",
+    "progress",
+    "retryCount",
+    "createdAt",
+    "updatedAt"
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/compliance-flag.schema.json",
+  "title": "ComplianceFlag",
+  "description": "Rule evaluation result, anomaly finding, or contradiction record per PRD §12.4",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the compliance flag"
+    },
+    "tenderId": {
+      "type": "string",
+      "description": "Associated Tender identifier"
+    },
+    "bidderId": {
+      "type": "string",
+      "description": "Associated Bidder identifier"
+    },
+    "ruleId": {
+      "type": "string",
+      "description": "Optional associated Tender Rule identifier"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "Verified",
+        "Potential Non-Compliance",
+        "Needs Review",
+        "Insufficient Evidence",
+        "Missing"
+      ],
+      "description": "Compliance status of the finding per PRD §8.4 / §12.4"
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["low", "medium", "high", "critical"],
+      "description": "Risk severity level"
+    },
+    "title": {
+      "type": "string",
+      "description": "Short human-readable summary of the finding"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Detailed explanation of the contradiction or rule result"
+    },
+    "evidenceIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Identifiers of linked evidence anchors"
+    },
+    "linkedFlagIds": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Identifiers of related or conflicting compliance flags"
+    },
+    "aiRecommendation": {
+      "type": "string",
+      "description": "Original automated recommendation from the Compliance Engine"
+    },
+    "officerDecision": {
+      "type": "string",
+      "description": "Current officer decision state if reviewed"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of last update"
+    }
+  },
+  "required": [
+    "id",
+    "tenderId",
+    "bidderId",
+    "status",
+    "severity",
+    "title",
+    "reason",
+    "evidenceIds",
+    "aiRecommendation",
+    "createdAt",
+    "updatedAt"
+  ],
+  "additionalProperties": false
+}

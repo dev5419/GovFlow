@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://govflow.internal/schemas/audit-event.schema.json",
+  "title": "AuditEvent",
+  "description": "Immutable append-only audit record of officer actions and system events per PRD §9.2 and §10",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "description": "Audit Event ID"
+    },
+    "tenderId": {
+      "type": "string",
+      "description": "Tender ID"
+    },
+    "bidderId": {
+      "type": "string",
+      "description": "Bidder ID"
+    },
+    "documentId": {
+      "type": "string",
+      "description": "Document ID, where applicable"
+    },
+    "complianceFlagId": {
+      "type": "string",
+      "description": "Compliance Flag ID, where applicable"
+    },
+    "officerUserId": {
+      "type": "string",
+      "description": "Officer User ID"
+    },
+    "officerRole": {
+      "type": "string",
+      "description": "Officer Role"
+    },
+    "aiRecommendation": {
+      "type": "string",
+      "description": "Original AI Recommendation"
+    },
+    "officerDecision": {
+      "type": "string",
+      "description": "Officer Decision"
+    },
+    "officerNotes": {
+      "type": "string",
+      "description": "Officer Notes"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Timestamp of the action"
+    },
+    "previousDecisionState": {
+      "type": "string",
+      "description": "Previous Decision State"
+    },
+    "newDecisionState": {
+      "type": "string",
+      "description": "New Decision State"
+    }
+  },
+  "required": [
+    "id",
+    "tenderId",
+    "bidderId",
+    "officerUserId",
+    "officerRole",
+    "aiRecommendation",
+    "officerDecision",
+    "timestamp",
+    "newDecisionState"
+  ],
+  "additionalProperties": false
+}

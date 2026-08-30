@@ -1,0 +1,15 @@
+{
+  "name": "@govflow/shared-types",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./typescript/index.ts",
+  "types": "./typescript/index.ts",
+  "exports": {
+    ".": {
+      "types": "./typescript/index.ts",
+      "import": "./typescript/index.ts",
+      "default": "./typescript/index.ts"
+    },
+    "./schemas/*": "./schemas/*"
+  }
+}

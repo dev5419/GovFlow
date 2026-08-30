@@ -1,0 +1,9 @@
+{
+  "name": "@govflow/api-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "uvicorn src.main:app --reload --port 8000",
+    "test": "pytest tests/"
+  }
+}
