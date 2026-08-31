@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@govflow/shared-types": ["../../packages/shared-types/typescript/index.ts"]
     }
   },
   "include": [

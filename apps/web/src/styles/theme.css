@@ -1,1 +1,130 @@
-/* GovFlow theme tokens */
+/* GovFlow Design System Tokens per design.md and GovFlow_PRD.md §8.1 / §8.5 */
+
+:root {
+  /* Brand & Layout Palette */
+  --color-primary: #0C2340;          /* Deep Navy - Header & Brand Primary */
+  --color-primary-variant: #1B365D;  /* Slate Navy - Utility Nav & Accents */
+  --color-accent: #F37021;           /* Saffron/Orange - Primary CTA */
+  --color-accent-hover: #D95C0F;     /* Darker Orange - Hover State */
+  --color-secondary: #138808;        /* India Green - Success & Badges */
+  --color-bg-base: #F8F9FA;          /* Neutral Light - Page Canvas */
+  --color-surface: #FFFFFF;          /* Pure White - Cards & Containers */
+  --color-surface-alt: #F1F4F8;      /* Off-White - Inset Containers */
+  --color-text-primary: #212529;     /* Charcoal - High-Contrast Body */
+  --color-text-secondary: #595959;   /* Muted Gray - Secondary Captions */
+  --color-border: #DDE2E5;           /* Light Gray - Card & Grid Dividers */
+  --color-focus: #0C2340;            /* Deep Blue - Accessible Focus Ring */
+
+  /* Node / Status Color Semantics per PRD §8.5 */
+  --color-status-verified: #138808;        /* Green - Verified / Compliant */
+  --color-status-verified-bg: #E8F5E9;     /* Light green tint for badges */
+  --color-status-needs-review: #D97706;    /* Amber - Needs Review / Insufficient Evidence */
+  --color-status-needs-review-bg: #FEF3C7; /* Light amber tint for badges */
+  --color-status-non-compliant: #DC2626;   /* Red - Potential / Confirmed Non-Compliance */
+  --color-status-non-compliant-bg: #FEE2E2;/* Light red tint for badges */
+  --color-status-missing: #6B7280;         /* Grey - Missing */
+  --color-status-missing-bg: #F3F4F6;      /* Light grey tint for badges */
+  --color-status-processing: #2563EB;      /* Blue - Processing */
+  --color-status-processing-bg: #EFF6FF;   /* Light blue tint for badges */
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Typography Scale */
+  --font-display: 32px;
+  --font-h1: 28px;
+  --font-h2: 22px;
+  --font-h3: 18px;
+  --font-body: 14px;
+  --font-caption: 12px;
+}
+
+/* Card Styling per design.md: 1px solid #DDE2E5 border, 4px radius, 0 1px 3px rgba(0,0,0,0.08) */
+.gov-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 4px;
+  padding: 16px 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.gov-card:hover {
+  box-shadow: 0 4px 8px -1px rgba(0, 0, 0, 0.12), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+/* Primary CTA Button per design.md: Solid #F37021, white text, 4px radius */
+.gov-btn-primary {
+  background-color: var(--color-accent);
+  color: #FFFFFF;
+  padding: 8px 20px;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.gov-btn-primary:hover {
+  background-color: var(--color-accent-hover);
+}
+
+.gov-btn-primary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Secondary Button per design.md: Transparent bg, 1px solid #0C2340, #0C2340 text, 4px radius */
+.gov-btn-secondary {
+  background-color: transparent;
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  border-radius: 4px;
+  padding: 8px 18px;
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.5;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
+}
+
+.gov-btn-secondary:hover {
+  background-color: var(--color-surface-alt);
+}
+
+.gov-btn-secondary:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 2px;
+}
+
+/* Input / Select per design.md: 1px solid #C4CDD5, 4px radius, 40px height */
+.gov-input, .gov-select {
+  background-color: #FFFFFF;
+  border: 1px solid #C4CDD5;
+  border-radius: 4px;
+  height: 40px;
+  padding: 6px 12px;
+  font-size: 14px;
+  color: var(--color-text-primary);
+  line-height: 1.5;
+}
+
+.gov-input:focus-visible, .gov-select:focus-visible {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 1px;
+}
