@@ -8,6 +8,7 @@ from celery import Celery
 from src.shared.config import settings
 from src.database import get_db_session
 from src.queue.consumers.ingestion_consumer import process_document_uploaded_event
+from src.ocr.tasks import process_document_preprocessed_event
 
 celery_app = Celery(
     "govflow_workers",
@@ -45,4 +46,20 @@ def process_document_upload_task(
             file_bytes=file_bytes,
             file_path=file_path,
             db_session=db_session,
+        )
+
+@celery_app.task(name="ocr.process_ocr_extraction", bind=True)
+def process_ocr_extraction_task(
+    self,
+    event_data: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Celery task consuming 'document.preprocessed' event.
+    Executes OCR and layout-aware extraction, saves ExtractedField records,
+    and emits 'document.extraction.completed'.
+    """
+    with next(get_db_session()) as db_session:
+        return process_document_preprocessed_event(
+            event_data=event_data,
+            db_session=db_session
         )

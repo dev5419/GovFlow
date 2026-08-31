@@ -3,5 +3,6 @@ from src.database.models.document import (
     DocumentPageModel,
     ProcessingJobModel,
 )
+from src.database.models.extracted_field import ExtractedFieldModel
 
-__all__ = ["DocumentModel", "DocumentPageModel", "ProcessingJobModel"]
+__all__ = ["DocumentModel", "DocumentPageModel", "ProcessingJobModel", "ExtractedFieldModel"]
